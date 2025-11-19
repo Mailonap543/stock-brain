@@ -22,3 +22,6 @@ stock-brain:
     api-key: 2L3YEGX6OAUEF3Z1
   brapi:
     token: "aJXWrkCLz4tdYQNsYtfjGh"
+  gemini:
+    api-key: "AIzaSyDkEQ5ZUNveA-P9-nVHozhz40sLgQ55QXU"
+    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"

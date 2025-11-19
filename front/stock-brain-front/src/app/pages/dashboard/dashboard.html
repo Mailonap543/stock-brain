@@ -1,0 +1,126 @@
+<div class="dashboard-bg" style="background-image: url('/assets/walpper1.jpg');">
+  <div class="overlay"></div> </div>
+
+<div class="content-wrapper">
+    
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);">
+      <div class="container">
+        <span class="navbar-brand mb-0 h1 fw-bold text-white fs-3">
+          <i class="bi bi-graph-up-arrow me-2 text-success"></i> StockBrain
+        </span>
+
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center text-white">
+            <div class="text-end me-3 d-none d-md-block">
+              <div class="fw-bold">{{ username }}</div>
+              <div class="text-white-50" style="font-size: 0.75rem;">Clique na foto para alterar</div>
+            </div>
+            
+            <div class="avatar-container" (click)="triggerFileInput()" title="Alterar foto">
+              <img [src]="avatarUrl" class="rounded-circle border border-2 border-white object-fit-cover shadow" width="50" height="50">
+              <div class="avatar-overlay">
+                <i class="bi bi-camera-fill text-white"></i>
+              </div>
+            </div>
+            
+            <input type="file" id="avatarInput" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+          </div>
+
+          <button class="btn btn-danger btn-sm ms-2 rounded-circle" (click)="logout()" title="Sair" style="width: 40px; height: 40px;">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+      
+      <div class="row justify-content-center mb-5">
+        <div class="col-md-6">
+          <div class="input-group input-group-lg shadow-lg rounded-pill overflow-hidden">
+            <input type="text" class="form-control border-0 px-4" placeholder="Digite o ticker (Ex: PETR4.SA)" 
+                   [(ngModel)]="ticker" (keyup.enter)="analyze()">
+            <button class="btn btn-primary px-4 fw-bold" type="button" (click)="analyze()" [disabled]="isLoadingStock">
+              <span *ngIf="isLoadingStock" class="spinner-border spinner-border-sm"></span>
+              <span *ngIf="!isLoadingStock"><i class="bi bi-search"></i></span>
+            </button>
+          </div>
+          <div *ngIf="error" class="text-danger bg-white p-2 rounded mt-2 text-center fw-bold shadow-sm animate-fade-in">
+            {{ error }}
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="stockData" class="row justify-content-center mb-4 animate-fade-in">
+        <div class="col-md-8">
+          <div class="card card-custom p-4 border-start border-5" 
+               [ngClass]="{'border-success': stockData.verdict === 'COMPRAR', 
+                           'border-warning': stockData.verdict === 'AGUARDAR', 
+                           'border-secondary': stockData.verdict === 'NEUTRO' || stockData.verdict === 'ERRO'}">
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="m-0 fw-bold text-dark">{{ stockData.symbol }}</h2>
+              <span class="badge rounded-pill fs-6 py-2 px-3" 
+                    [ngClass]="{'bg-success': stockData.verdict === 'COMPRAR', 
+                                'bg-warning text-dark': stockData.verdict === 'AGUARDAR', 
+                                'bg-secondary': stockData.verdict === 'NEUTRO'}">
+                {{ stockData.verdict }}
+              </span>
+            </div>
+
+            <div class="row text-center mb-4 g-3">
+              <div class="col-4">
+                <div class="p-2 rounded bg-light border">
+                  <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Preço</small>
+                  <span class="fs-5 fw-bold text-dark">R$ {{ stockData.currentPrice | number:'1.2-2' }}</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="p-2 rounded bg-light border">
+                  <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Teto Bazin</small>
+                  <span class="fs-5 fw-bold text-dark">R$ {{ stockData.fairPriceBazin | number:'1.2-2' }}</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="p-2 rounded bg-light border">
+                  <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Yield</small>
+                  <span class="fs-5 fw-bold" [class.text-success]="stockData.dividendYield > 6">{{ stockData.dividendYield | number:'1.2-2' }}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-light border mb-3">
+              <i class="bi bi-info-circle-fill text-primary me-2"></i> {{ stockData.message }}
+            </div>
+
+            <div class="text-center mt-2" *ngIf="!aiAdvice">
+              <button class="btn btn-outline-primary rounded-pill px-4 fw-bold" (click)="askAi()" [disabled]="isLoadingAi">
+                <i *ngIf="!isLoadingAi" class="bi bi-stars me-2"></i>
+                <span *ngIf="isLoadingAi" class="spinner-border spinner-border-sm me-2"></span>
+                Consultar IA
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="aiAdvice" class="row justify-content-center mb-5 animate-fade-in">
+        <div class="col-md-8">
+          <div class="card card-custom p-4 bg-gradient-ai text-white border-0">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div class="d-flex align-items-center">
+                <div class="bg-white text-primary rounded-circle p-2 me-3 shadow-sm d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                  <i class="bi bi-robot fs-5"></i>
+                </div>
+                <h5 class="m-0 fw-bold">Análise Gemini</h5>
+              </div>
+              <button class="btn btn-sm btn-outline-light rounded-circle" (click)="clearAi()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="ai-content p-3 rounded" [innerHTML]="aiAdvice"></div> 
+          </div>
+        </div>
+      </div>
+
+    </div>
+</div>

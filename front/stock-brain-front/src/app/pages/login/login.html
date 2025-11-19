@@ -1,0 +1,48 @@
+<div class="login-screen bg-transition" 
+     [style.background-image]="isRegistering ? 'url(/assets/walpper2.jpg)' : 'url(/assets/loginpag.jpg)'">
+  
+  <div class="overlay"></div>
+
+  <div class="login-content col-md-5 col-lg-4">
+    
+    <div class="text-center mb-4 position-relative">
+      <i class="bi bi-graph-up-arrow text-success" style="font-size: 3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+      <h1 class="h3 mb-3 fw-normal text-white fw-bold text-shadow">
+        {{ isRegistering ? 'Nova Conta' : 'StockBrain' }}
+      </h1>
+      <p class="text-white-50" *ngIf="!isRegistering">Acesse sua carteira inteligente</p>
+    </div>
+
+    <div class="card card-custom p-4 shadow-lg position-relative">
+      <form [formGroup]="loginForm" (ngSubmit)="submitAction()">
+        
+        <div *ngIf="errorMessage" class="alert alert-danger py-2 small">{{ errorMessage }}</div>
+        <div *ngIf="successMessage" class="alert alert-success py-2 small">{{ successMessage }}</div>
+
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="userInput" placeholder="Usuário" formControlName="username">
+          <label for="userInput">Usuário</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="password" class="form-control" id="passInput" placeholder="Senha" formControlName="password">
+          <label for="passInput">Senha</label>
+        </div>
+
+        <button class="w-100 btn btn-lg btn-primary mb-3 fw-bold" type="submit" [disabled]="isLoading || loginForm.invalid">
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isLoading ? 'Processando...' : (isRegistering ? 'Cadastrar Agora' : 'Entrar') }}
+        </button>
+
+        <div class="text-center border-top pt-3">
+          <a href="javascript:void(0)" (click)="toggleMode()" class="text-decoration-none fw-semibold">
+            {{ isRegistering ? 'Já tenho conta. Fazer Login' : 'Não tem conta? Cadastre-se' }}
+          </a>
+        </div>
+
+      </form>
+    </div>
+    
+    <p class="mt-5 mb-3 text-white-50 text-center small">&copy; 2025 StockBrain Inc</p>
+  </div>
+</div>
